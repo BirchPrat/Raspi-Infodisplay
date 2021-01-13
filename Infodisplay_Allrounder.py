@@ -2,8 +2,8 @@
 #giving access to relevant paths
 import sys
 sys.path.insert(1, '/home/pi/Desktop/PythonCode/Api_cred/')
-sys.path.insert(1, '/home/pi/Desktop/PythonCode/Classes/')
-sys.path.insert(1, '/home/pi/Desktop/PythonCode/Functions/')
+sys.path.insert(1, '/home/pi/Desktop/PythonCode/Display/Classes/')
+sys.path.insert(1, '/home/pi/Desktop/PythonCode/Display/Functions/')
 #Classes
 import ApiFetcher, FunStuff, ModuleFetcher, SysStat
 #Functions
@@ -21,10 +21,9 @@ import time
 from PIL import Image, ImageDraw, ImageFont 
 
 ##Setting up the Display, Buttons and Temperature Reader
-button_a = Button(23)
-button_b = Button(24)
-button_c = Button(13)
-button_d = Button(5)
+button_a = Button(23) #displaybutton up
+button_b = Button(24) #displaybutton down
+
 disp = gpio_settup.displaysettup()
 draw_st7789.clearimage(disp)
 temp_reader_power = OutputDevice(21) #temperature reader GPIO Pin Power
@@ -62,8 +61,10 @@ if __name__ == "__main__":
         statnow = pistat.get_systemstats()        
 
         if timeinhours == '00': #display sleeping for 6 hours from 0-6 am
+            gpio_settup.displaysettup(init = 'no', backlight = 'off')
             draw_st7789.clearimage(disp)
             time.sleep(sleepy)
+            gpio_settup.displaysettup(init = 'no', backlight = 'on')
             
         if timeinseconds in refreshratelist_tempreader:
             temp = dht22.tempfetcher_dht22()
@@ -113,100 +114,74 @@ if __name__ == "__main__":
         """Button B (Displayswitch down) - misc"""  
         if button_b.is_pressed:
             draw_st7789.clearimage(disp)
+            
+            start_time = time.time()
 
             while True:
-                if button_b.is_pressed:
-                    food = fun.foodchoice()
-                    
-                    infosdic_b = {
-                        "I <3 Batzi":["", "#ff0000", font_2],
-                        f"{food}":["", "#B2BBA7", font_1],
-                        }
+                statnow = pistat.get_systemstats(light = 'no')
+                uptime = pistat.get_uptime()
+                total_time = time.time() - start_time
 
-                    draw_st7789.displaywrite(disp, infosdic_b)
-                
+                infosdic_b = {
+                    f"{use_func.time_converter(total_time)}":[" Start Time", "#00b050", font_1],
+                    f"{statnow[0]}":["", "#FFFFFF", font_1],
+                    f"{statnow[1]}":["", "#FFFF00", font_1],
+                    f"{statnow[2]}":["", "#00FF00", font_1],
+                    f"{statnow[3]}":["", "#0000FF", font_1],
+                    f"{statnow[4]}":["", "#FF00FF", font_1],
+                    }
+
+                draw_st7789.displaywrite(disp, infosdic_b)                
+                          
                 if button_a.is_pressed:
                     draw_st7789.clearimage(disp)
                     time.sleep(0.5)
                     break
                 
+                """Button B (Displayswitch down again) - Shutdown/Reboot"""
+                if button_b.is_pressed:
+                    
+                    while True:
+                        infosdic_c = {
+                            "Shutdown hold UP":["", "#950a24", font_1],
+                            f"Shutdown in {10-shutoff_presscounter}":["", "#950a24", font_1],
+                            "Reboot hold LB":["", "#00b050", font_1],
+                            f"Reboot in {10-reboot_presscounter}":["", "#00b050", font_1],
+                            "To quit press UP & LB 5x":["", "#fa9632", font_1],
+                        }
+                        draw_st7789.displaywrite(disp, infosdic_c)
+                        if button_a.is_pressed:
+                            shutoff_presscounter += 1
+                        elif button_b.is_pressed:
+                            reboot_presscounter += 1
+                            
+                        if shutoff_presscounter == 10:
+                            infosdic_c = {
+                                "Shutting down!":["", "#ff0000", font_1],
+                                "Good Bye :)":["", "#ff0000", font_1],
+                            }
+                            draw_st7789.displaywrite(disp, infosdic_c)
+                            pistat.shut_down()
+                            time.sleep(15)
+                        
+                        if reboot_presscounter == 10:
+                            infosdic_c = {
+                                "Rebooting!":["", "#ff0000", font_1],
+                                "See you soon :)":["", "#ff0000", font_1],
+                            }
+                            draw_st7789.displaywrite(disp, infosdic_c)
+                            pistat.reboot()
+                            time.sleep(15)
+                        
+                        if reboot_presscounter == 5 & shutoff_presscounter == 5:
+                            break
+                    
+                        time.sleep(0.1)                        
+                
+                
                 time.sleep(0.5)
         
-        """Button C (MX-Switch right) - Shutdown/Reboot""" 
-        if button_c.is_pressed:
-            draw_st7789.clearimage(disp)
-            
-            while True:
-                
-                infosdic_c = {
-                    "Shutdown hold RB":["", "#950a24", font_1],
-                    f"Shutdown in {10-shutoff_presscounter}":["", "#950a24", font_1],
-                    "Reboot hold LB":["", "#00b050", font_1],
-                    f"Reboot in {10-reboot_presscounter}":["", "#00b050", font_1],
-                    "To quit press else":["", "#fa9632", font_1],
-                }
-                draw_st7789.displaywrite(disp, infosdic_c)
-                if button_c.is_pressed:
-                    shutoff_presscounter += 1
-                elif button_d.is_pressed:
-                    reboot_presscounter += 1
-                    
-                if shutoff_presscounter == 10:
-                    infosdic_c = {
-                        "Shutting down!":["", "#ff0000", font_1],
-                        "Good Bye :)":["", "#ff0000", font_1],
-                    }
-                    draw_st7789.displaywrite(disp, infosdic_c)
-                    pistat.shut_down()
-                    time.sleep(15)
-                
-                if reboot_presscounter == 10:
-                    infosdic_c = {
-                        "Rebooting!":["", "#ff0000", font_1],
-                        "See you soon :)":["", "#ff0000", font_1],
-                    }
-                    draw_st7789.displaywrite(disp, infosdic_c)
-                    pistat.reboot()
-                    time.sleep(15)
-                
-                if button_a.is_pressed or button_b.is_pressed:
-                    break
-            
-                time.sleep(0.1)
-                
-        """Button D (MX-Switch Left) - Timer""" 
-        if button_d.is_pressed:
-            draw_st7789.clearimage(disp)            
-            
-            start_time = time.time()
-            last_time = start_time
-            last_lap = 0
-            
-            while True:
-                
-                lap_time = time.time() - last_time
-                total_time = time.time() - start_time
-                
-                
-                infosdic_d = {
-                    "Start Time":[f"{use_func.time_converter(total_time)}", "#448D76", font_1],
-                    f"Lap Time":[f"{use_func.time_converter(lap_time)}", "#B2D732", font_1],
-                    f"Last Lap":[f"{use_func.time_converter(last_lap)}", "#8EAF18", font_1],
-                    "Exit with RB":["", "#FF0516", font_1],
-                }
-                draw_st7789.displaywrite(disp, infosdic_d)
-                
-                if button_d.is_pressed:
-                    last_lap = time.time() - last_time 
-                    last_time = time.time()
-                    
-                if button_c.is_pressed:
-                    break
-                
-                time.sleep(0.1)
-
-        
-        
+              
         time.sleep(0.5)
 
 

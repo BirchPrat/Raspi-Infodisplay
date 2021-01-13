@@ -11,17 +11,17 @@ class SysStat:
             return temp
         else:
             cmd = "hostname -I | cut -d' ' -f1"
-            ip_adress = "IP: " + subprocess.check_output(cmd, shell=True).decode("utf-8")  
+            ip_adress = "IP: " + subprocess.check_output(cmd, shell=True).decode("utf-8")
+            cmd = "top -bn1 | grep load | awk '{printf \"CPU Load: %.2f\", $(NF-2)}'"
+            cpu_util = subprocess.check_output(cmd, shell=True).decode("utf-8")
+            cmd = "free -m | awk 'NR==2{printf \"Mem: %s/%s \", $3,$2,$3*100/$2 }'"
+            mem_usage = subprocess.check_output(cmd, shell=True).decode("utf-8")
             cmd = 'df -h | awk \'$NF=="/"{printf "Disk: %d/%d GB  %s", $3,$2,$5}\''
             disk = subprocess.check_output(cmd, shell=True).decode("utf-8")
-            cmd = "top -bn1 | grep load | awk '{printf \"%.2f\", $(NF-2)}'"
-            cpu_uti = subprocess.check_output(cmd, shell=True).decode("utf-8")
-            cmd = "free -m | awk 'NR==2{printf \"%s/%s\", $3,$2,$3*100/$2 }'"
-            mem_usage = subprocess.check_output(cmd, shell=True).decode("utf-8")
-            cmd = "cat /sys/class/thermal/thermal_zone0/temp |  awk '{printf \"%.1f\", $(NF-0) / 1000}'" 
+            cmd = "cat /sys/class/thermal/thermal_zone0/temp |  awk '{printf \"CPU Temp: %.1f C\", $(NF-0) / 1000}'"  # pylint: disable=line-too-long
             cpu_temp = subprocess.check_output(cmd, shell=True).decode("utf-8")
 
-            return [ip_adress, disk, cpu_uti, mem_usage, cpu_temp]
+            return [ip_adress, cpu_util, cpu_temp, mem_usage, disk]
 
     def get_uptime(self):
         """Reading the uptime of the pi from a file""" 
