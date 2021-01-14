@@ -124,11 +124,11 @@ if __name__ == "__main__":
 
                 infosdic_b = {
                     f"{use_func.time_converter(total_time)}":[" Start Time", "#00b050", font_1],
-                    f"{statnow[0]}":["", "#FFFFFF", font_1],
-                    f"{statnow[1]}":["", "#FFFF00", font_1],
-                    f"{statnow[2]}":["", "#00FF00", font_1],
-                    f"{statnow[3]}":["", "#0000FF", font_1],
-                    f"{statnow[4]}":["", "#FF00FF", font_1],
+                    f"{statnow[0]}":["", "#80e7e5", font_1],
+                    f"{statnow[1]}":["", "#edf47a", font_1],
+                    f"{statnow[2]}":["", "#ffd380", font_1],
+                    f"{statnow[3]}":["", "#fdbfbf", font_1],
+                    f"{statnow[4]}":["", "#dfa1a1", font_1],
                     }
 
                 draw_st7789.displaywrite(disp, infosdic_b)                
