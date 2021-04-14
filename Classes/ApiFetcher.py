@@ -3,11 +3,23 @@ import json
 import time
 import pprint
 
-class ApiFetcher:
-    """ApiFetcher Class, for fetching data from Api's"""
-    def __init__(self, apikey = ''):
+class PiholeApi:
+    """Pihole Api data gatherer"""
+    def __init__(self, apikey = '', ipadress = 'localhost'):
         self.apikey = apikey
+        self.ipadress = ipadress
+        self.api_url = f'http://{self.ipadress}/admin/api.php'
+        self.auth = f'&auth={self.apikey}'
 
+    #Helper Function:
+    def piholedat(self, query, authreq = 'no'):
+        if authreq == 'no':
+            data = requests.get(self.api_url + query)
+        else:
+            data = requests.get(self.api_url + query + self.auth)
+
+        return json.loads(data.text)
+    
     def dayquerrycalc(self, dnsdic):
         """Calculating ads per 24h cycle within pihole api"""
         dayquerry = 0
@@ -19,12 +31,11 @@ class ApiFetcher:
                 dayquerry = valueint + dayquerry         
         return(dayquerry)
 
-    def get_piholedat(self, lasttwentyfour = 'no'):     
+    #Data Getters
+    def get_dailystats(self, lasttwentyfour = 'no'):     
         """Pihole Data Gatherer"""
-        api_url = 'http://localhost/admin/api.php?overTimeData10mins'
         try:
-            r = requests.get(api_url)
-            data = json.loads(r.text)
+            data = self.piholedat('?overTimeData10mins')
             if lasttwentyfour == 'yes':
                 DNSQUERIES = sum(data['domains_over_time'].values())
                 ADS = sum(data['ads_over_time'].values())
@@ -44,11 +55,49 @@ class ApiFetcher:
             ADSBLOCKED = None
             ADS = None
             return [DNSQUERIES, ADSBLOCKED, ADS]
+        
+    def get_summary(self):
+        return self.piholedat('?summary')
+    
+    def get_topitems(self, itemnum = '10'):
+        return self.piholedat(f'?topItems={itemnum}', 'yes')
+    
+    def get_topclients(self):
+        return self.piholedat('?topClients', 'yes')
 
-
-    def getweather(self, location = 'Cologne', info = False):
+    def get_forwarddestinations(self):
+        return self.piholedat('?getForwardDestinations', 'yes')
+    
+    def get_querytypes(self):
+        return self.piholedat('?getQueryTypes', 'yes')
+    
+    def get_allqueries(self, mostrecent = 'yes'):
+        if mostrecent == 'yes':
+            mostrecent = self.piholedat('?getAllQueries', 'yes')
+            return mostrecent['data'][-1]
+        
+        return self.piholedat('?getAllQueries', 'yes')
+    
+    def get_recentblocked(self):
+        r = requests.get(self.api_url + '?recentBlocked' + self.auth)
+        return r.text
+    
+    def pi_enable(self):
+        r = requests.get(self.api_url + '?enable' + self.auth)
+        return None
+    
+    def pi_disable(self, time='15'):
+        r = requests.get(self.api_url + '?disable' + self.auth)
+        return None
+    
+      
+class WeatherApi:
+    """ApiFetcher Class, for fetching data from Api's"""
+    def __init__(self, apikey = ''):
+        self.apikey = apikey
+           
+    def get_weather(self, location = 'Cologne', info = False):
         """Weatheroutput function"""
-
         try:
             url = f"https://api.openweathermap.org/data/2.5/weather?q={location}&units=metric&appid={self.apikey}"
             r = requests.get(url)
@@ -74,8 +123,10 @@ class ApiFetcher:
             currenttemp, humidity, windspeed, clouds, pressure, city, currenttime, sunrise, sunset = "F"*9
 
             return [city, currenttemp, humidity, windspeed, pressure, clouds, currenttime, sunrise, sunset]
-
-       
+        
+        
+        
+        
         
         
 

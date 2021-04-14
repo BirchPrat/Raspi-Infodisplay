@@ -26,7 +26,8 @@ disp = gpio_settup.displaysettup()
 draw_st7789.clearimage(disp)
 
 #Setting up the Class Objects
-apidat = ApiFetcher.ApiFetcher(apikey = str(cred.weather_key))
+weather_api = ApiFetcher.WeatherApi(cred.weather_key)
+pihole_api = ApiFetcher.PiholeApi(cred.pihole_key, cred.pihole_ip)
 fun = FunStuff.FunStuff()
 pistat = SysStat.SysStat()
 
@@ -49,8 +50,8 @@ if __name__ == "__main__":
         date = time.strftime('%d')
         shutoff_presscounter = 0
         reboot_presscounter = 0
-        pihole = apidat.get_piholedat()
-        statnow = pistat.get_systemstats()        
+        pihole = pihole_api.get_dailystats()
+        statnow = pistat.get_systemstats(light = 'no')
 
         if timeinhours == '00': #display sleeping for 6 hours from 0-6 am
             gpio_settup.displaysettup(init = 'no', backlight = 'off')
@@ -63,11 +64,13 @@ if __name__ == "__main__":
         try:
             infosdic = {
                 time.strftime('%b %d %H:%M:%S'):["", "#D61A46", font_1],
-                f"{temp[0]}°C":["Innen Temp:", "#FC600A", font_1],
-                f"{temp[1]}%":["H2O Luft:", "#347B98", font_1],
-                f"{statnow}°C":["CPU Temp:", "#FB9902", font_1],
-                f"{pihole[0]}":["DNS Queries:", "#9BD770", font_1],
-                f"{pihole[1]}%":["Ads Blocked:", "#66B032", font_1]
+                f"{temp[0]}°C":[" Innen Temp:", "#FC600A", font_1],
+                f"{temp[1]}%":[" H2O Luft:", "#347B98", font_1],
+                f"{statnow[0]}":["", "#FFFFFF", font_1],
+                f"{statnow[1]}":["", "#FFFF00", font_1],
+                f"{statnow[2]}":["", "#00FF00", font_1],
+                f"{statnow[3]}":["", "#0000FF", font_1],
+                f"{statnow[4]}":["", "#FF00FF", font_1],
                 }
 
             draw_st7789.displaywrite(disp, infosdic, rotation=180)
@@ -81,7 +84,7 @@ if __name__ == "__main__":
 
 
             print("Getting Weather:", time.strftime("%a, %d %b %Y %H:%M:%S", time.localtime()))
-            weather = apidat.getweather()
+            weather = weather_api.get_weather()
             
             infosdic_a = {
                 time.strftime(f"{weather[0]} {weather[6]}"):["Stadt:", "#D85930", font_1],

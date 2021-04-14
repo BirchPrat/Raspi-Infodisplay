@@ -33,7 +33,10 @@ time.sleep(1) #letting the sensor initialize, otherwise error may occur
 
 #Setting up the Class Objects
 dht22 = ModuleFetcher.ModuleFetcher(dht22 = dhtDevice)
-apidat = ApiFetcher.ApiFetcher(apikey = str(cred.weather_key))
+
+weather_api = ApiFetcher.WeatherApi(cred.weather_key)
+pihole_api = ApiFetcher.PiholeApi(cred.pihole_key, cred.pihole_ip)
+
 fun = FunStuff.FunStuff()
 pistat = SysStat.SysStat()
 
@@ -57,7 +60,7 @@ if __name__ == "__main__":
         date = time.strftime('%d')
         shutoff_presscounter = 0
         reboot_presscounter = 0
-        pihole = apidat.get_piholedat()
+        pihole = pihole_api.get_dailystats()
         statnow = pistat.get_systemstats()        
 
         if timeinhours == '00': #display sleeping for 6 hours from 0-6 am
