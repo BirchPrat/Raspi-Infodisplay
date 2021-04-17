@@ -2,6 +2,7 @@ import requests
 import json
 import time
 import pprint
+from datetime import datetime
 
 class PiholeApi:
     """Pihole Api data gatherer"""
@@ -73,9 +74,28 @@ class PiholeApi:
     
     def get_allqueries(self, mostrecent = 'yes'):
         if mostrecent == 'yes':
-            mostrecent = self.piholedat('?getAllQueries', 'yes')
-            return mostrecent['data'][-1]
-        
+            queries = self.piholedat('?getAllQueries', 'yes')
+            mostrecent = queries['data'][-3:-1]
+            
+            for i in mostrecent:
+                i[0] = datetime.fromtimestamp(int(i[0])).strftime('%b %d %H:%M:%S')
+                
+                #queri type color coding
+                if int(i[4]) == 0:
+                    i.append('Unknown')
+                    i.append('#808080')
+                elif int(i[4]) in range(2,4):
+                    i.append('Allowed')
+                    i.append('#00FF00')
+                elif int(i[4]) >=12:
+                    i.append('Allowed')
+                    i.append('#00FF00')
+                else:
+                    i.append('Blocked')
+                    i.append('#FF0000')
+            
+            return mostrecent
+                    
         return self.piholedat('?getAllQueries', 'yes')
     
     def get_recentblocked(self):
@@ -113,7 +133,7 @@ class WeatherApi:
                 clouds = weather['clouds']['all']
                 pressure = weather['main']['pressure']
                 city = weather['name']
-                currenttime = time.strftime("%H:%M", time.localtime(int(weather['dt'])))
+                currenttime = time.strftime("%b %d %H:%M", time.localtime(int(weather['dt'])))
                 sunrise = time.strftime("%H:%M", time.localtime(int(weather['sys']['sunrise'])))
                 sunset = time.strftime("%H:%M", time.localtime(int(weather['sys']['sunset'])))
 

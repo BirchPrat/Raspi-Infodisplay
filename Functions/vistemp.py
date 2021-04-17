@@ -22,13 +22,16 @@ def vistemp(path, filetag):
     #print(filelist)
 
     data = pd.concat((pd.read_csv(f, encoding='utf-8', low_memory=False, parse_dates=(['Stringtime']),index_col=('Stringtime')) for f in filelist))
-
+    
     #first glance at data
     #print(data.shape)
     #print(data.head(10), data.tail(10))
 
     #last 24 hours data selection / the str() is a workaround, because without it raised an error on the pi (not so on windows)
-    last24 = data[str(datetime.datetime.now() - datetime.timedelta(days=1, hours=1)) : str(datetime.datetime.now())]
+    #last24 = data[str(datetime.datetime.now() - datetime.timedelta(days=1, hours=1)) : str(datetime.datetime.now())]
+    last24 = data.sort_index()[(datetime.datetime.now() - datetime.timedelta(days=1, hours=1)) : datetime.datetime.now()]
+  
+    
     #print(last24)
     #print(last24['Outside Temp -C'])
 
@@ -71,10 +74,10 @@ def vistemp(path, filetag):
 
     ###################################
     ##last week data selection and Plot
-    last_week = data[str(datetime.datetime.now().date() - datetime.timedelta(days=7)) : str(datetime.datetime.now().date())]
-
-    #making daily avarages
-    last_week = last_week.resample(rule='D').mean()
+    last_week = data.sort_index()[datetime.datetime.now().date() - datetime.timedelta(days=7) : datetime.datetime.now().date()]
+    
+    #making daily avarages if hourly is not a good fit
+    #last_week = last_week.resample(rule='6H').mean()
     #print(last_week)
 
     # Create figure and plot space
@@ -118,10 +121,10 @@ def vistemp(path, filetag):
 
     ###################################
     ##last months in weeks data selection and Plot
-    last_months = data[str(datetime.datetime.now().date() - datetime.timedelta(weeks=12, hours=1)) : str(datetime.datetime.now().date())]
+    last_months = data.sort_index()[datetime.datetime.now().date() - datetime.timedelta(weeks=12, hours=1) : datetime.datetime.now().date()]
 
-    #making daily avarages
-    last_months = last_months.resample(rule='W').mean()
+    #making 12h avarages if hourly is not a good fit
+    #last_months = last_months.resample(rule='12H', offset='9H').mean()
     #print(last_months['Outside Temp -C'])
 
     # Create figure and plot space
@@ -129,10 +132,10 @@ def vistemp(path, filetag):
 
     # Add x-axis and y-axis
     ax.plot(last_months.index, last_months['Inside Temp -C'],
-           color='red')
+           color='red', linewidth=0.25)
 
     ax.plot(last_months.index, last_months['Outside Temp -C'],
-           color='blue')
+           color='blue', linewidth=0.25)
 
     # Set title and labels for axes
     #ax.set(xlabel="Weeks avarage",
@@ -161,6 +164,7 @@ def vistemp(path, filetag):
 
     #Save Plot
     plt.savefig(f'{path}/weekly_temp.png', bbox_inches='tight')
+
 
 if __name__ == "__main__":
     vistemp('/home/pi/Documents/Templog', 'templogger.csv')

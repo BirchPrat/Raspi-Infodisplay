@@ -29,7 +29,7 @@ class SysStat:
             uptime_seconds = float(f.readline().split()[0])
             uptime_days = uptime_seconds/60/60/24
 
-        return uptime_days
+        return round(uptime_days, 2)
     
     def shut_down(self):
         """Shutting down pi"""

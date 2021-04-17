@@ -17,7 +17,7 @@ def clearimage(disp, landscape='no'):
     draw.rectangle((0, 0, disp.width, disp.height), outline=0, fill=(0, 0, 0))
     disp.image(image, rotation)
     
-def displaywrite(disp, infos_dic, landscape='no', rotation = 90):
+def displaywrite(disp, infos_list, landscape='no', rotation = 90):
     #x and y starting positions
     x = 0
     y = -2
@@ -32,10 +32,9 @@ def displaywrite(disp, infos_dic, landscape='no', rotation = 90):
     image = Image.new('RGB', (width, height))
     draw = ImageDraw.Draw(image)
 
-    for info,text in infos_dic.items():
-        draw.text((x, y), f"{text[0]} {info}", font=text[2], fill=text[1])
-        y += text[2].getsize(info)[1]
-
+    for line in infos_list:
+        draw.text((x, y), f"{line[0]}", font=line[2], fill=line[1])
+        y += line[2].getsize(line[0])[1]    
 
     disp.image(image, rotation)
 
