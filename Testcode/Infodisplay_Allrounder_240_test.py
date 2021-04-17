@@ -172,13 +172,11 @@ if __name__ == "__main__":
                                 
                         infolist_b2 = [
                             [f"{queri[1][0]}", "#00b050", font_1],
-                            [f"{queri[1][1]}", "#FFFFFF", font_1],
                             [f"{queri[1][2]}", "#FFFF00", font_1],
                             [f"{queri[1][3]}", "#6897bb", font_1],
                             [f"{queri[1][-2]} {queri[1][4]}", f"{queri[1][-1]}", font_1],
-                            [f" ", "#00b050", font_small],                            
+                            [f" ", "#00b050", font_1],                            
                             [f"{queri[0][0]}", "#00b050", font_1],
-                            [f"{queri[0][1]}", "#FFFFFF", font_1],
                             [f"{queri[0][2]}", "#FFFF00", font_1],
                             [f"{queri[0][3]}", "#6897bb", font_1],
                             [f"{queri[0][-2]} {queri[0][4]}", f"{queri[0][-1]}", font_1],
