@@ -196,8 +196,10 @@ if __name__ == "__main__":
                                 infolist_b3 = [
                                     ["Shutdown hold UP", "#950a24", font_1],
                                     [f"Shutdown in {10-shutoff_presscounter}", "#950a24", font_1],
+                                    [f" ", "#00b050", font_1],
                                     ["Reboot hold LB", "#00b050", font_1],
                                     [f"Reboot in {10-reboot_presscounter}", "#00b050", font_1],
+                                    [f" ", "#00b050", font_1],
                                     ["To quit press UP & LB 5x", "#fa9632", font_1],
                                     ]
                                 draw_st7789.displaywrite(disp, infolist_b3, rotation = 180)
