@@ -13,7 +13,9 @@ import cred
 #buttoncontrol and power
 from gpiozero import Button
 from gpiozero import OutputDevice
-
+#DHT22 sensor library
+import adafruit_dht
+import board
 #other
 import time
 from PIL import Image, ImageDraw, ImageFont 
