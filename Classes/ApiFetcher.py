@@ -103,11 +103,11 @@ class PiholeApi:
         return r.text
     
     def pi_enable(self):
-        r = requests.get(self.api_url + '?enable' + self.auth)
+        requests.get(self.api_url + '?enable' + self.auth)
         return None
     
     def pi_disable(self, time='15'):
-        r = requests.get(self.api_url + '?disable' + self.auth)
+        requests.get(self.api_url + '?disable' + self.auth)
         return None
     
       
