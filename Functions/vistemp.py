@@ -21,7 +21,7 @@ def vistemp(path, filetag):
 
     #print(filelist)
 
-    data = pd.concat((pd.read_csv(f, encoding='utf-8', low_memory=False, parse_dates=(['Stringtime']),index_col=('Stringtime')) for f in filelist))
+    data = pd.concat((pd.read_csv(f, encoding='utf-8', low_memory=False, parse_dates=(['Stringtime']),index_col=('Stringtime'), na_values = ["F", "failed"]) for f in filelist))
     
     #first glance at data
     #print(data.shape)
@@ -167,6 +167,6 @@ def vistemp(path, filetag):
 
 
 if __name__ == "__main__":
-    vistemp('/home/pi/Documents/Templog', 'templogger.csv')
+    vistemp('/media/SAVE', 'templogger.csv')
 
 

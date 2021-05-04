@@ -112,7 +112,6 @@ if __name__ == "__main__":
 
             draw_st7789.displaywrite(disp, infolist_a, rotation = 180)
             
-            vistemp.vistemp('/media/SAVE', 'templogger.csv')               
             
             presscounter_a = 0
             
@@ -128,6 +127,10 @@ if __name__ == "__main__":
                     break
                 
                 if presscounter_a == 1:
+                    try:
+                        vistemp.vistemp('/media/SAVE', 'templogger.csv')
+                    except:
+                        pass
                     draw_st7789.displaypic(disp, '/media/SAVE/hourly_temp.png')
                 elif presscounter_a == 2:
                     draw_st7789.displaypic(disp, '/media/SAVE/daily_temp.png')
@@ -221,20 +224,20 @@ if __name__ == "__main__":
                                     reboot_presscounter += 1
                                     
                                 if shutoff_presscounter == 10:
-                                    infosdic_c = {
-                                        "Shutting down!":["", "#ff0000", font_1],
-                                        "Good Bye :)":["", "#ff0000", font_1],
-                                    }
-                                    draw_st7789.displaywrite(disp, infosdic_c, rotation = 180)
+                                    infolist_b3a = [
+                                        ["Shutting down!", "#ff0000", font_1],
+                                        ["Good Bye :)", "#ff0000", font_1],
+                                    ]
+                                    draw_st7789.displaywrite(disp, infolist_b3a, rotation = 180)
                                     pistat.shut_down()
                                     time.sleep(15)
                                 
                                 if reboot_presscounter == 10:
-                                    infosdic_c = {
-                                        "Rebooting!":["", "#ff0000", font_1],
-                                        "See you soon :)":["", "#ff0000", font_1],
-                                    }
-                                    draw_st7789.displaywrite(disp, infosdic_c)
+                                    infolist_b3b = [
+                                        ["Rebooting!", "#ff0000", font_1],
+                                        ["See you soon :)", "#ff0000", font_1],
+                                    ]
+                                    draw_st7789.displaywrite(disp, infolist_b3b, rotation = 180)
                                     pistat.reboot()
                                     time.sleep(15)
                                 
