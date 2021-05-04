@@ -7,9 +7,10 @@ from PIL import Image, ImageDraw, ImageFont
 
 class Display:
     """Display Class for settup, writing and displaying pictures"""
-    def __init__(self, size):
+    def __init__(self, size, rotate = 0):
         self.size = size
         self.disp = self.displaysettup()
+        self.rotate = rotate
 
     def settup(self):
         self.disp
@@ -56,7 +57,7 @@ class Display:
         return disp
 
 
-    def displaywrite(self, infos_list, rotation = 90):
+    def displaywrite(self, infos_list):
         """writing text on the display"""
         #x and y starting positions
         x = 0
@@ -72,7 +73,29 @@ class Display:
             draw.text((x, y), f"{line[0]}", font=line[2], fill=line[1])
             y += line[2].getsize(line[0])[1]    
 
-        self.disp.image(image, rotation)
+        self.disp.image(image, self.rotate)
+
+    def displayclear(self):
+        #Drawing the balck rectangle and displaying it
+        image = Image.new('RGB', (self.disp.width, self.disp.height))
+        draw = ImageDraw.Draw(image)
+
+        draw.rectangle((0, 0, self.disp.width, self.disp.height), outline=0, fill=(0, 0, 0))
+        self.disp.image(image, self.rotate)
+
+    def backlight(self, status):
+        # Turn on/off the backlight 
+        if status == 'on':
+            backlight = digitalio.DigitalInOut(board.D22)
+            backlight.switch_to_output()
+            backlight.value = True
+
+        elif status == 'off':
+            backlight = digitalio.DigitalInOut(board.D22)
+            backlight.switch_to_output()
+            backlight.value = False
+
+
 
     def displaypic(self, imageloc):
         image = Image.open(f"{imageloc}")
@@ -94,7 +117,7 @@ class Display:
         image = image.crop((x, y, x + self.disp.width, y + self.disp.height))
         
         # self.display image.
-        self.disp.image(image)
+        self.disp.image(image, self.rotate)
 
 
 

@@ -5,9 +5,9 @@ sys.path.insert(1, '/home/pi/Documents/Api_cred/')
 sys.path.insert(1, '/home/pi/Documents/Display/Classes/')
 sys.path.insert(1, '/home/pi/Documents/Display/Functions/')
 #Classes
-import ApiFetcher, FunStuff, ModuleFetcher, SysStat
+import ApiFetcher, FunStuff, ModuleFetcher, SysStat, Display
 #Functions
-import draw_st7789, gpio_settup, use_func, vistemp
+import gpio_settup, use_func, vistemp
 #api credentials
 import cred
 #buttoncontrol and power
@@ -21,17 +21,16 @@ import time
 from PIL import Image, ImageDraw, ImageFont 
 
 ##Setting up the Display, Buttons and Temperature Reader
-button_a = Button(23) #displaybutton up
-button_b = Button(24) #displaybutton down
+button_a = Button(24) #displaybutton up
+button_b = Button(23) #displaybutton down
+disp = Display.Display('240x240') #display class
 
-disp = gpio_settup.displaysettup()
-draw_st7789.clearimage(disp)
 temp_reader_power = OutputDevice(21) #temperature reader GPIO Pin Power
 temp_reader_power.on()
 dhtDevice = adafruit_dht.DHT22(board.D20, use_pulseio=False) #temperature reader data pin
 time.sleep(1) #letting the sensor initialize, otherwise error may occur
 
-#Setting up the Class Objects
+#Setting up the other Class Objects
 dht22 = ModuleFetcher.ModuleFetcher(dht22 = dhtDevice)
 weather_api = ApiFetcher.WeatherApi(cred.weather_key)
 pihole_api = ApiFetcher.PiholeApi(cred.pihole_key, cred.pihole_ip)
@@ -65,10 +64,10 @@ if __name__ == "__main__":
         uptime =  use_func.time_converter(time.time() - script_start)
 
         if timeinhours == '00': #display sleeping for 6 hours from 0-6 am
-            gpio_settup.displaysettup(init = 'no', backlight = 'off')
-            draw_st7789.clearimage(disp)
+            disp.displayclear()
+            disp.backlight('off')
             time.sleep(sleepy)
-            gpio_settup.displaysettup(init = 'no', backlight = 'on')
+            disp.backlight('on')
             
         if timeinseconds in refreshratelist_tempreader:
             for i in range(5): #because the reader fails often
@@ -89,12 +88,11 @@ if __name__ == "__main__":
             [f"{statnow[4]}", "#daa520", font_1],                      
             ]
         
-        draw_st7789.displaywrite(disp, infolist_main, rotation=180)
-
-        
+        disp.displaywrite(infolist_main)
+     
         """Button A (Displayswitch up 1. time) - weather"""
         if button_a.is_pressed:
-            draw_st7789.clearimage(disp)
+            disp.displayclear()
             weather = weather_api.get_weather()
             
             infolist_a = [
@@ -110,7 +108,7 @@ if __name__ == "__main__":
                 [f"Sonnenunter: {weather[8]}", "#FFA500", font_1],
                 ]
 
-            draw_st7789.displaywrite(disp, infolist_a, rotation = 180)
+            disp.displaywrite(infolist_a)
             
             
             presscounter_a = 0
@@ -122,7 +120,7 @@ if __name__ == "__main__":
                     presscounter_a += 1
                     
                 if button_b.is_pressed:
-                    draw_st7789.clearimage(disp)
+                    disp.displayclear()
                     time.sleep(0.5)
                     break
                 
@@ -131,17 +129,17 @@ if __name__ == "__main__":
                         vistemp.vistemp('/media/SAVE', 'templogger.csv')
                     except:
                         pass
-                    draw_st7789.displaypic(disp, '/media/SAVE/hourly_temp.png')
+                    disp.displaypic('/media/SAVE/hourly_temp.png')
                 elif presscounter_a == 2:
-                    draw_st7789.displaypic(disp, '/media/SAVE/daily_temp.png')
+                    disp.displaypic('/media/SAVE/daily_temp.png')
                 elif presscounter_a == 3:
-                    draw_st7789.displaypic(disp, '/media/SAVE/weekly_temp.png')
+                    disp.displaypic('/media/SAVE/weekly_temp.png')
                     
                 time.sleep(0.5)
 
         """Button B (Displayswitch down 1. Time) - Pihole Infos"""  
         if button_b.is_pressed:
-            draw_st7789.clearimage(disp)
+            disp.displayclear()
             time.sleep(0.5) # to reduce double clicks
             
             start_time = time.time()
@@ -167,16 +165,16 @@ if __name__ == "__main__":
                     [f"{pihole_api.get_recentblocked()}", "#D61A46", font_1],
                     ]
 
-                draw_st7789.displaywrite(disp, infolist_b1, rotation = 180)                
+                disp.displaywrite(infolist_b1)               
                           
                 if button_a.is_pressed:
-                    draw_st7789.clearimage(disp)
+                    disp.displayclear()
                     time.sleep(0.5)
                     break
                 
                 """Button B (Displayswitch 2. time down) - Pihole Tail"""
                 if button_b.is_pressed:
-                    draw_st7789.clearimage(disp)
+                    disp.displayclear()
                     shutoff_presscounter = 0
                     reboot_presscounter = 0
                     time.sleep(0.5)
@@ -196,10 +194,10 @@ if __name__ == "__main__":
                             [f"{queri[0][-2]} {queri[0][4]}", f"{queri[0][-1]}", font_1],
                             ]
                         
-                        draw_st7789.displaywrite(disp, infolist_b2, rotation = 180)                          
+                        disp.displaywrite(infolist_b2)                          
                   
                         if button_a.is_pressed:
-                            draw_st7789.clearimage(disp)
+                            disp.displayclear()
                             time.sleep(0.5)
                             break
   
@@ -216,7 +214,7 @@ if __name__ == "__main__":
                                     [f" ", "#00b050", font_1],
                                     ["To quit press UP & LB 5x", "#fa9632", font_1],
                                     ]
-                                draw_st7789.displaywrite(disp, infolist_b3, rotation = 180)
+                                disp.displaywrite(infolist_b3)
                                 
                                 if button_a.is_pressed:
                                     shutoff_presscounter += 1
@@ -228,7 +226,7 @@ if __name__ == "__main__":
                                         ["Shutting down!", "#ff0000", font_1],
                                         ["Good Bye :)", "#ff0000", font_1],
                                     ]
-                                    draw_st7789.displaywrite(disp, infolist_b3a, rotation = 180)
+                                    disp.displaywrite(infolist_b3a)
                                     pistat.shut_down()
                                     time.sleep(15)
                                 
@@ -237,7 +235,7 @@ if __name__ == "__main__":
                                         ["Rebooting!", "#ff0000", font_1],
                                         ["See you soon :)", "#ff0000", font_1],
                                     ]
-                                    draw_st7789.displaywrite(disp, infolist_b3b, rotation = 180)
+                                    disp.displaywrite(infolist_b3b)
                                     pistat.reboot()
                                     time.sleep(15)
                                 
