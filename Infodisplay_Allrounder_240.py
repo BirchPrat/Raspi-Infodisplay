@@ -111,7 +111,7 @@ if __name__ == "__main__":
             disp.displaywrite(infolist_a)
 
             try:
-                vistemp.vistemp('/media/SAVE', 'templogger.csv')
+                vistemp.vistemp('/media/PiUSB', 'templogger.csv')
             except:
                 pass
 
@@ -130,11 +130,11 @@ if __name__ == "__main__":
                     presscounter_a += 1
                 
                 if presscounter_a == 1:
-                    disp.displaypic('/media/SAVE/hourly_temp.png')
+                    disp.displaypic('/media/PiUSB/hourly_temp.png')
                 elif presscounter_a == 2:
-                    disp.displaypic('/media/SAVE/daily_temp.png')
+                    disp.displaypic('/media/PiUSB/daily_temp.png')
                 elif presscounter_a == 3:
-                    disp.displaypic('/media/SAVE/weekly_temp.png')
+                    disp.displaypic('/media/PiUSB/weekly_temp.png')
                     
                 time.sleep(1)
 
