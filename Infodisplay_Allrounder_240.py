@@ -23,7 +23,7 @@ from PIL import Image, ImageDraw, ImageFont
 ##Setting up the Display, Buttons and Temperature Reader
 button_a = Button(24) #displaybutton up
 button_b = Button(23) #displaybutton down
-disp = Display.Display('240x240') #display class
+disp = Display.Display('240x240', type="mini") #display class
 
 temp_reader_power = OutputDevice(21) #temperature reader GPIO Pin Power
 temp_reader_power.on()

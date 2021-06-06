@@ -19,6 +19,7 @@ class Display:
         if self.type == "mini":
             cs_pin = digitalio.DigitalInOut(board.CE0)
             dc_pin = digitalio.DigitalInOut(board.D25)
+            backlight = digitalio.DigitalInOut(board.D22)
             reset_pin = None
             BAUDRATE = 24000000
 
