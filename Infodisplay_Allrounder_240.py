@@ -109,33 +109,34 @@ if __name__ == "__main__":
                 ]
 
             disp.displaywrite(infolist_a)
-            
-            
+
+            try:
+                vistemp.vistemp('/media/PiUSB', 'templogger.csv')
+            except:
+                pass
+
             presscounter_a = 0
-            
+
+            time.sleep(0.5)
+    
             while True:
-                """Button A (Displayswitch up 2. time) - weather"""
-                
-                if button_a.is_pressed:    
-                    presscounter_a += 1
-                    
+                """Button A (Displayswitch up 2. time) - weather Graphs"""
                 if button_b.is_pressed:
                     disp.displayclear()
                     time.sleep(0.5)
                     break
+
+                if button_a.is_pressed:    
+                    presscounter_a += 1
                 
                 if presscounter_a == 1:
-                    try:
-                        vistemp.vistemp('/media/SAVE', 'templogger.csv')
-                    except:
-                        pass
-                    disp.displaypic('/media/SAVE/hourly_temp.png')
+                    disp.displaypic('/media/PiUSB/hourly_temp.png')
                 elif presscounter_a == 2:
-                    disp.displaypic('/media/SAVE/daily_temp.png')
+                    disp.displaypic('/media/PiUSB/daily_temp.png')
                 elif presscounter_a == 3:
-                    disp.displaypic('/media/SAVE/weekly_temp.png')
+                    disp.displaypic('/media/PiUSB/weekly_temp.png')
                     
-                time.sleep(0.5)
+                time.sleep(1)
 
         """Button B (Displayswitch down 1. Time) - Pihole Infos"""  
         if button_b.is_pressed:
