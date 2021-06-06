@@ -3,12 +3,10 @@ import time
 from Display import Display
 from PIL import Image, ImageDraw, ImageFont
 
-disp = Display('240x240', rotate = 0)
-disp.settup()
+disp = Display('240x240', type = "gamepad", rotate = 180)
+#disp.settup()
 
 font_1 = ImageFont.truetype('/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf', 22)
-
-#disp.displaysettup("240x240")
 
 while True:
     writer = [
@@ -24,7 +22,8 @@ while True:
 
     time.sleep(1)
 
-    disp.displaypic('/media/SAVE/hourly_temp.png')
+    disp.displaypic('/home/pi/Desktop/image.jpg')
+    #disp.displaypic('/media/SAVE/hourly_temp.png')
 
     time.sleep(5)
 

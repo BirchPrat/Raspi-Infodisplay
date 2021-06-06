@@ -7,23 +7,28 @@ from PIL import Image, ImageDraw, ImageFont
 
 class Display:
     """Display Class for settup, writing and displaying pictures"""
-    def __init__(self, size, rotate = 0):
+    def __init__(self, size, type, rotate = 0):
         self.size = size
-        self.disp = self.displaysettup()
         self.rotate = rotate
-
-    def settup(self):
-        self.disp
+        self.type = type
+        self.disp = self.displaysettup() # this initializes the display when object is created
 
     def displaysettup(self):
         """Setting up the st7789 Display"""
-        cs_pin = digitalio.DigitalInOut(board.CE0)
-        dc_pin = digitalio.DigitalInOut(board.D25)
-        reset_pin = None
-
-        # Config for display baudrate (default max is 24mhz):
-        BAUDRATE = 24000000
         
+        if self.type == "mini":
+            cs_pin = digitalio.DigitalInOut(board.CE0)
+            dc_pin = digitalio.DigitalInOut(board.D25)
+            reset_pin = None
+            BAUDRATE = 24000000
+
+        if self.type == "gamepad":
+            cs_pin = digitalio.DigitalInOut(board.CE0)
+            dc_pin = digitalio.DigitalInOut(board.D25)
+            reset_pin = digitalio.DigitalInOut(board.D24)
+            backlight = digitalio.DigitalInOut(board.D26)
+            BAUDRATE = 24000000
+      
         # Create the ST7789 display, depending on size:
         if self.size == '240x240':
             disp = st7789.ST7789(
@@ -36,6 +41,7 @@ class Display:
                 y_offset=80,
                 rotation=180
             )
+
         elif self.size == '240x135':
             # Create the ST7789 display:
             disp = st7789.ST7789(
@@ -50,12 +56,10 @@ class Display:
                 y_offset=40)
 
         # Turn on the backlight
-        backlight = digitalio.DigitalInOut(board.D22)
         backlight.switch_to_output()
         backlight.value = True
 
         return disp
-
 
     def displaywrite(self, infos_list):
         """writing text on the display"""
@@ -94,8 +98,6 @@ class Display:
             backlight = digitalio.DigitalInOut(board.D22)
             backlight.switch_to_output()
             backlight.value = False
-
-
 
     def displaypic(self, imageloc):
         image = Image.open(f"{imageloc}")
