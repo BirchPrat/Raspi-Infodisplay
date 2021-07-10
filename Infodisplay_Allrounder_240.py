@@ -1,13 +1,14 @@
 """Allrounder Infodisplay"""
 #giving access to relevant paths
 import sys
-sys.path.insert(1, '/home/pi/Documents/Api_cred/')
-sys.path.insert(1, '/home/pi/Documents/Display/Classes/')
-sys.path.insert(1, '/home/pi/Documents/Display/Functions/')
+sys.path.insert(1, '/home/pi/Documents/')
+sys.path.insert(1, '/home/pi/Documents/Raspi-Infodisplay/Classes/')
+sys.path.insert(1, '/home/pi/Documents/Raspi-Infodisplay/Functions/')
 #Classes
 import ApiFetcher, FunStuff, ModuleFetcher, SysStat, Display
 #Functions
 import gpio_settup, use_func, vistemp
+
 #api credentials
 import cred
 #buttoncontrol and power
@@ -70,7 +71,7 @@ if __name__ == "__main__":
             disp.backlight('on')
             
         if timeinseconds in refreshratelist_tempreader:
-            temp = dht22.get_tem_dht22()
+            temp = dht22.get_temp_dht22()
         
         infolist_main = [
             [f"{time.strftime('%b %d %H:%M:%S')}", '#00b050', font_1],

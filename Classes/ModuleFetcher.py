@@ -20,17 +20,17 @@ class ModuleFetcher:
         return [temp, humid, pressure]
             
     def get_temp_dht22(self):
-        for attempt in range(5):
+        for attempt in range(10):
             try:
-                humidity, temperature = self.temp_module.humidity, self.temp_module.temperature
-                temp = round(temperature, 2)
-                humid = round(humidity,2)
+                temp = round(self.temp_module.temperature, 2)
+                humid = round(self.temp_module.humidity, 2)
                 pressure = 'NaN'
                 return [temp, humid, pressure]
             except:
                 temp = 'NaN'
                 humid = 'NaN'
                 pressure = 'NaN'
+            print(attempt)
         return [temp, humid, pressure] 
         
 
