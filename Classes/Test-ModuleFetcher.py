@@ -1,10 +1,12 @@
 #Module Fetcher test
 from ModuleFetcher import ModuleFetcher
 from gpiozero import OutputDevice
-import adafruit_dht
+#import adafruit_dht
 import board
 import time
+import adafruit_bme280 
 
+'''
 """Powering DHT22 with provided pin number """
 power = OutputDevice(21)
 power.on()
@@ -19,4 +21,18 @@ dht22 = ModuleFetcher(dht22 = dhtDevice)
 
 
 temp = dht22.tempfetcher_dht22()
+print(temp)
+
+'''
+
+##Preparation
+i2c = board.I2C()  # uses board.SCL and board.SDA
+bme280 = adafruit_bme280.Adafruit_BME280_I2C(i2c)
+
+print(f'{bme280}')
+
+sensorstat = ModuleFetcher(bme280)
+
+temp = sensorstat.get_temp_bme280()
+
 print(temp)

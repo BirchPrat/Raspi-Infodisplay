@@ -1,37 +1,39 @@
-import Adafruit_DHT
 
 
 class ModuleFetcher:
     """ModuleFetcher Class, for fetching data from pi modules"""
-    def __init__(self, dht22_pin = '', dht22 = ''):
-        self.dht22_pin = dht22_pin
-        self.dht22 = dht22
+    def __init__(self, temp_module = ''):
+        self.temp_module = temp_module
 
-    def tempfetcher_dht22(self):
-        """Geting the data from the dht22 sensor using circuit python library"""
-        try:
+    def get_temp_bme280(self):
+        """Geting the data from either dht22 or bme280"""
+        for attempt in range(5):
+            try:
+                temp = round(self.temp_module.temperature, 2)
+                humid = round(self.temp_module.relative_humidity, 2)
+                pressure = round(self.temp_module.pressure, 2)
+                return [temp, humid, pressure]
+            except:
+                temp = 'NaN'
+                humid = 'NaN'
+                pressure = 'NaN'
+        return [temp, humid, pressure]
+            
+    def get_temp_dht22(self):
+        for attempt in range(5):
+            try:
+                humidity, temperature = self.temp_module.humidity, self.temp_module.temperature
+                temp = round(temperature, 2)
+                humid = round(humidity,2)
+                pressure = 'NaN'
+                return [temp, humid, pressure]
+            except:
+                temp = 'NaN'
+                humid = 'NaN'
+                pressure = 'NaN'
+        return [temp, humid, pressure] 
+        
 
-            humidity, temperature = self.dht22.humidity, self.dht22.temperature
-                    
-            humi = round(humidity,2)
-            temp = round(temperature, 2)
-            
-        except:
-            humi = "failed"
-            temp = "failed"
-            
-        return [temp, humi]
 
-    def tempfetcher_dht22_old(self):
-        """Geting the data from the dht22 sensor using old library"""
-        try:
-            humidity, temperature = Adafruit_DHT.read_retry(Adafruit_DHT.DHT22, self.dht22_pin)
-                    
-            humi = round(humidity,2)
-            temp = round(temperature, 2)
-            
-        except TypeError:
-            humi = "failed"
-            temp = "failed"
-            
-        return [temp, humi]
+
+

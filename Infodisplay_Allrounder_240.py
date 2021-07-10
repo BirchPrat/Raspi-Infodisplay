@@ -31,7 +31,7 @@ dhtDevice = adafruit_dht.DHT22(board.D20, use_pulseio=False) #temperature reader
 time.sleep(1) #letting the sensor initialize, otherwise error may occur
 
 #Setting up the other Class Objects
-dht22 = ModuleFetcher.ModuleFetcher(dht22 = dhtDevice)
+dht22 = ModuleFetcher.ModuleFetcher(dhtDevice)
 weather_api = ApiFetcher.WeatherApi(cred.weather_key)
 pihole_api = ApiFetcher.PiholeApi(cred.pihole_key, cred.pihole_ip)
 fun = FunStuff.FunStuff()
@@ -70,10 +70,7 @@ if __name__ == "__main__":
             disp.backlight('on')
             
         if timeinseconds in refreshratelist_tempreader:
-            for i in range(5): #because the reader fails often
-                temp = dht22.tempfetcher_dht22()
-                if temp[0] != 'failed':
-                    break
+            temp = dht22.get_tem_dht22()
         
         infolist_main = [
             [f"{time.strftime('%b %d %H:%M:%S')}", '#00b050', font_1],

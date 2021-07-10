@@ -32,7 +32,7 @@ dhtDevice = adafruit_dht.DHT22(board.D20, use_pulseio=False) #temperature reader
 time.sleep(1) #letting the sensor initialize, otherwise error may occur
 
 #Setting up the Class Objects
-dht22 = ModuleFetcher.ModuleFetcher(dht22 = dhtDevice)
+dht22 = ModuleFetcher.ModuleFetcher(dhtDevice)
 apidat = ApiFetcher.ApiFetcher(apikey = str(cred.weather_key))
 fun = FunStuff.FunStuff()
 pistat = SysStat.SysStat()
