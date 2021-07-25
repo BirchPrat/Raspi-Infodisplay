@@ -6,6 +6,8 @@ from datetime import datetime
 #setting up keys
 sys.path.insert(1, '/home/pi/Documents')
 import cred
+
+'''
 api_key = cred.pihole_key
 
 pifetch = ApiFetcher.PiholeApi(cred.pihole_key, cred.pihole_ip)
@@ -26,14 +28,9 @@ allqueries = pifetch.get_allqueries()
 print(allqueries)
 #print(allqueries[0], datetime.fromtimestamp(int(allqueries[0])).strftime('%Y-%m-%d %H:%M:%S'))
 '''
+weather_api = ApiFetcher.WeatherApi(cred.weather_key)
 
-sys.path.insert(1, '/home/pi/Desktop/PythonCode/Api_cred/')
-import cred
-api_key = cred.weather_key
+#weather = weather_api.get_weather_hourly(info = False)
+#weather = weather_api.get_weather_daily(info = False)
 
-wfeatch = ApiFetcher.WeatherApi(apikey = str(cred.weather_key))
-print(str(cred.weather_key))
-
-weather = wfeatch.get_weather()
-print(weather)
-'''
+weather = weather_api.get_weather(info=True)

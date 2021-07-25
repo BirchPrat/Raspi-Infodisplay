@@ -1,17 +1,22 @@
 "Display Settup and Write Class"
 import adafruit_rgb_display.st7789 as st7789
-import board, digitalio
+import board, digitalio, time, math
 from gpiozero import OutputDevice
 #drawing functions on st7789
 from PIL import Image, ImageDraw, ImageFont
 
 class Display:
     """Display Class for settup, writing and displaying pictures"""
-    def __init__(self, size, type, rotate = 0):
+    def __init__(self, size, type, rotate = 0, font_location = ''):
         self.size = size
         self.rotate = rotate
         self.type = type
         self.disp = self.displaysettup() # this initializes the display when object is created
+
+        #fonts
+        if font_location != '':
+            self.font_1 = ImageFont.truetype(font_location, 22)
+            self.font_clock = ImageFont.truetype(font_location, 15)
 
     def displaysettup(self):
         """Setting up the st7789 Display"""
@@ -62,7 +67,7 @@ class Display:
 
         return disp
 
-    def displaywrite(self, infos_list):
+    def displaywrite(self, infos_list, padding = 0):
         """writing text on the display"""
         #x and y starting positions
         x = 0
@@ -76,7 +81,25 @@ class Display:
 
         for line in infos_list:
             draw.text((x, y), f"{line[0]}", font=line[2], fill=line[1])
-            y += line[2].getsize(line[0])[1]    
+            y += line[2].getsize(line[0])[1] + padding
+
+        self.disp.image(image, self.rotate)
+
+    def displaywrite_alt(self, infos_list, padding = 0):
+        """writing text on the display"""
+        #x and y starting positions
+        x = 0
+        y = -2
+        
+        height = self.disp.width   # swap height/width to rotate to landscape
+        width =  self.disp.height
+            
+        image = Image.new('RGB', (width, height))
+        draw = ImageDraw.Draw(image)
+
+        for line in infos_list:
+            draw.text((x, y), f"{line[0]}", font=line[2], fill=line[1])
+            y += + padding
 
         self.disp.image(image, self.rotate)
 
@@ -122,8 +145,180 @@ class Display:
         # self.display image.
         self.disp.image(image, self.rotate)
 
+    def display_main_simple(self, sensor_data, pistat_class, uptime):
+        pistat = pistat_class.get_systemstats(light = 'no')
 
+        """Displaying temperature, pistats uptime and weather"""
+        infolist = [
+            [f"{time.strftime('%b %d %H:%M:%S')}", '#00b050', self.font_1],
+            [f"Innen Temp: {sensor_data[0]}°C", '#FC600A', self.font_1],
+            [f"H2O Luft: {sensor_data[1]}%", "#347B98", self.font_1],
+            [f" ", "#347B98", self.font_1],
+            [f"{pistat[0]}", "#576675", self.font_1],
+            [f"Uptime: {uptime[1]} days", '#D61A46', self.font_1],            
+            [f"{pistat[1]}", "#ffc0cb", self.font_1],
+            [f"{pistat[2]}", "#FC600A", self.font_1],
+            [f"{pistat[3]}", "#808080", self.font_1],
+            [f"{pistat[4]}", "#daa520", self.font_1],                      
+            ]
+        
+        self.displaywrite(infolist)
+    
+    def display_main_weather(self, sensor_data, pistat_class, uptime, weather):
+        pistat = pistat_class.get_systemstats(light = 'no')
 
+        """Displaying temperature, pistats uptime and weather"""
+        infolist = [
+            [f"{time.strftime('%b %d %H:%M:%S')}", '#00b050', self.font_1],
+            [f" ", "#347B98", self.font_1],
+            [f"Innen Temp: {sensor_data[0]}°", '#FC600A', self.font_1],
+            [f"Außen Temp: {weather[1]}°", '#FC600A', self.font_1],
+            [f"Innen H2O: {sensor_data[1]}%", "#347B98", self.font_1],
+            [f"Außen H2O: {weather[2]}%", "#347B98", self.font_1],
+            [f" ", "#347B98", self.font_1],
+            [f"Uptime: {uptime[1]} days", '#D61A46', self.font_1],            
+            [f"{pistat[1]}", "#ffc0cb", self.font_1],
+            [f"{pistat[2]}", "#FC600A", self.font_1],
+            ]
+        
+        self.displaywrite_alt(infolist, padding = 24)
+
+    def display_weather_v1(self, temp, weather):
+        '''Displaying current weather stats'''
+        infolist = [
+            [f"Time: {weather[6]}", "#00b050", self.font_1],
+            [f"Außen Temp: {weather[1]}°C", "#FC600A", self.font_1],
+            [f"Diff in Temp: {round(abs(temp[0] - weather[1]), 2)}°C", "#FC600A", self.font_1],
+            [f"Außen H2O: {weather[2]}%", "#347B98", self.font_1],
+            [f"Diff in H2O: {round(abs(temp[1]  - weather[2]), 2)}%", "#347B98", self.font_1],
+            [f" ", "#347B98", self.font_1],
+            [f"Windgesch: {weather[3]}kmh", "#6897bb", self.font_1],
+            [f"Luftdruck: {weather[4]}hPa", "#3EB8C2", self.font_1],
+            [f"Sonnenauf: {weather[7]}", "#FFE946", self.font_1],
+            [f"Sonnenunter: {weather[8]}", "#FFA500", self.font_1],
+            ]
+
+        self.displaywrite(infolist)        
+
+    def display_weather_v2(self, weather):
+        '''Displaying current weather stats'''
+        infolist = [
+            [f"Time: {weather[6]}", "#00b050", self.font_1],
+            [f"Außen Temp: {weather[1]}°C", "#FC600A", self.font_1],
+            [f"Außen H2O: {weather[2]}%", "#347B98", self.font_1],
+            [f"Range: {weather[9]}-{weather[10]}°C", "#347B98", self.font_1],
+            [f" ", "#347B98", self.font_1],
+            [f"Windgesch: {weather[3]}kmh", "#6897bb", self.font_1],
+            [f"Luftdruck: {weather[4]}hPa", "#3EB8C2", self.font_1],
+            [f"Sonnenauf: {weather[7]}", "#FFE946", self.font_1],
+            [f"Sonnenunter: {weather[8]}", "#FFA500", self.font_1],
+            ]
+
+        self.displaywrite(infolist, padding = 5) 
+
+    def display_piholedat_v1(self, pihole_dailystats, pihole_summary, time_passed, recent_blocked):
+        """Displaying timer, blocked queries and last blocked"""
+        infolist = [
+            [f"Timer {time_passed}", "#00b050", self.font_1],
+            [f" ", "#00b050", self.font_1],
+            [f"Queries td: {pihole_dailystats[0]}", "#ffc0cb", self.font_1],
+            [f"Blocked td: {pihole_dailystats[1]}%", "#D61A46", self.font_1],
+            [f" ", "#00b050", self.font_1],                
+            [f"Queries 24H: {pihole_summary['dns_queries_today']}", "#ffc0cb", self.font_1],
+            [f"Blocked 24H: {pihole_summary['ads_percentage_today']}%", "#D61A46", self.font_1],
+            [f" ", "#00b050", self.font_1],
+            [f"Blocked Last:", "#ffc0cb", self.font_1],                                    
+            [f"{recent_blocked}", "#D61A46", self.font_1],
+            ]
+        
+        self.displaywrite(infolist)    
+
+    def display_piholedat_tail(self, pihole_api):
+        """Displaying pihole tail"""
+        queri = pihole_api.get_allqueries()
+        infolist = [
+            [f"{queri[1][0]}", "#00b050", font_1],
+            [f"{queri[1][2]}", "#FFFF00", font_1],
+            [f"{queri[1][3]}", "#6897bb", font_1],
+            [f"{queri[1][-2]} {queri[1][4]}", f"{queri[1][-1]}", font_1],
+            [f" ", "#00b050", font_1],                            
+            [f"{queri[0][0]}", "#00b050", font_1],
+            [f"{queri[0][2]}", "#FFFF00", font_1],
+            [f"{queri[0][3]}", "#6897bb", font_1],
+            [f"{queri[0][-2]} {queri[0][4]}", f"{queri[0][-1]}", font_1],
+            ]
+        
+        self.displaywrite(infolist)    
+
+    def warning_color_rgb(self, value):
+        """helper function for colors (5 colors according to rain probability)"""
+        if float(value) <= 0.2: 
+            return  "#008000"
+        elif float(value) > 0.2 and float(value) <=0.4:
+            return "#2ae32a"
+        elif float(value) > 0.4 and float(value) <=0.6:
+            return "#FFFF00"
+        elif float(value) > 0.6 and float(value) <=0.8:
+            return "#ff6700"
+        elif float(value) > 0.8 and float(value) <=1:
+            return "#FF0000"
+        else:
+            return (255, 255, 255, 255)
+
+    def display_weatherclock(self, weather, inside_temp = ''):
+        """Display a weather clock"""
+        #clock position settup
+        deg_to_radians = 0.0174533
+        radius = 95 # determines how big clock is
+        clock_x_y = []
+        hours = 0
+        #creating coordinates for the clock
+        for i in range(-60, 300, 30):
+            hours += 1
+            clock_x_y.append([math.cos(i*deg_to_radians)*radius+99, math.sin(i*deg_to_radians)*radius+110, hours])
+
+        #getting the middle of the circle
+        middle_x = (clock_x_y[2][0] + clock_x_y[8][0]) / 2
+        middle_y = (clock_x_y[2][1] + clock_x_y[8][1]) / 2
+
+        #drawing the clock and hourly weather
+        image = Image.new('RGB', (self.disp.height, self.disp.width))
+        draw = ImageDraw.Draw(image)
+
+        for position in clock_x_y:
+            for weath in weather[1]:
+                if int(weath[1]) == int(position[2]):
+                    colour = self.warning_color_rgb(weath[-1])
+                    draw.text((position[0], position[1]), f'{weath[2]}', font=self.font_clock, fill=colour)
+
+        #drawing current weather in the middle of the clock
+        if inside_temp == '':
+            draw.text((middle_x-15, middle_y-15), f'{weather[0][0]}', font=self.font_clock, fill='#00b050')
+            middle_y += self.font_clock.getsize(str(weather[0][0]))[1]
+            draw.text((middle_x-15, middle_y-15), f'{weather[0][1]}°C', font=self.font_clock, fill='#FC600A')
+            middle_y += self.font_clock.getsize(str(weather[0][0]))[1]
+            draw.text((middle_x-15, middle_y-15), f'{weather[0][2]}%', font=self.font_clock, fill='#347B98')
+
+        else:
+            draw.text((middle_x-23, middle_y-16), f'{weather[0][0]}', font=self.font_clock, fill='#00b050')
+            middle_y += self.font_clock.getsize(str(weather[0][0]))[1]
+            draw.text((middle_x-23, middle_y-16), f'{weather[0][1]}|{inside_temp[0]}°', font=self.font_clock, fill='#FC600A')
+            middle_y += self.font_clock.getsize(str(weather[0][0]))[1]
+            draw.text((middle_x-23, middle_y-16), f'{weather[0][2]}|{inside_temp[1]}%', font=self.font_clock, fill='#347B98')          
+
+        self.disp.image(image, self.rotate)
+        
+    def display_weather_week(self, weather):
+        """Displaying weather for next week"""
+     
+        infolist = []
+        colours = []
+        for i, daylist in enumerate(weather):
+            colour = self.warning_color_rgb(weather[i][-1])
+            colours.append(colour)
+            infolist.append([f"{weather[i][1]}: {weather[i][2]['min']}-{weather[i][2]['max']}°C", colours[i], self.font_1])
+
+        self.displaywrite(infolist, padding=8)   
 
 
 
