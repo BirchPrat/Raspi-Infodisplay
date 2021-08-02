@@ -117,6 +117,7 @@ class WeatherApi:
         self.apikey = apikey
            
     def get_weather(self, latitude = '50.96', longitude = '7.00', info = False):
+        print('getting current weather')
         """Current weather data"""
         try:
             url = f"https://api.openweathermap.org/data/2.5/weather?lat={latitude}&lon={longitude}&units=metric&appid={self.apikey}"
@@ -147,10 +148,11 @@ class WeatherApi:
             return [city, currenttemp, humidity, windspeed, pressure, clouds, currenttime, sunrise, sunset]
         
         
-    def get_weather_hourly(self, latitude = '50.96', longitude = '7.00', info = False):
+    def get_weather_onecall(self, latitude = '50.96', longitude = '7.00', info = False):
+        print('getting weather onecall')
         """Current and future weather data"""
         try:
-            url = f"https://api.openweathermap.org/data/2.5/onecall?lat={latitude}&lon={longitude}&units=metric&exclude=minutely,daily,alerts&appid={self.apikey}"
+            url = f"https://api.openweathermap.org/data/2.5/onecall?lat={latitude}&lon={longitude}&units=metric&exclude=minutely,alerts&appid={self.apikey}"
             r = requests.get(url)
             weather = json.loads(r.text)
         
@@ -158,6 +160,7 @@ class WeatherApi:
                 pprint.pprint(weather)
             
             else:
+                #hourly weather
                 hourly_weather = []
                 for num in range(1,13):
                     time_detailed = time.strftime("%b %d %H:%M", time.localtime(int(weather['hourly'][num]['dt'])))
@@ -173,6 +176,7 @@ class WeatherApi:
 
                     hourly_weather.append(list_now)
 
+                #current weather
                 temp = weather['current']['temp']
                 humidity = weather['current']['humidity']
                 windspeed = weather['current']['wind_speed']
@@ -182,9 +186,25 @@ class WeatherApi:
                 sunrise = time.strftime("%H:%M", time.localtime(int(weather['current']['sunrise'])))
                 sunset = time.strftime("%H:%M", time.localtime(int(weather['current']['sunset'])))
 
-                current_weather = [currenttime, temp, humidity, clouds, pressure, sunrise, sunset]
+                current_weather = [currenttime, temp, humidity, windspeed, clouds, pressure, sunrise, sunset]
                 
-                return [current_weather, hourly_weather]
+                #daily weather
+                daily_weather = []
+                for num in range(8):
+                    time_detailed = time.strftime("%b %d %H:%M", time.localtime(int(weather['daily'][num]['dt'])))
+                    time_day = time.strftime("%a", time.localtime(int(weather['daily'][num]['dt'])))
+                    temp = weather['daily'][num]['temp']
+                    humidity = weather['daily'][num]['humidity']
+                    clouds = weather['daily'][num]['clouds']
+                    pressure = weather['daily'][num]['pressure']
+                    rain_prob = weather['daily'][num]['pop']
+
+
+                    list_now = [time_detailed, time_day, temp, humidity, clouds, pressure, rain_prob]
+
+                    daily_weather.append(list_now)  
+
+                return [current_weather, hourly_weather, daily_weather]
 
         except:
             hourly_weather = []
@@ -193,12 +213,19 @@ class WeatherApi:
                 list_now = [time_detailed, time_hour, temp, humidity, clouds, pressure, rain_prob]
                 hourly_weather.append(list_now)
 
+            daily_weather = []
+            for num in range(8):
+                time_detailed, time_day, temp, humidity, clouds, pressure, rain_prob = 'F'*7
+                list_now = [time_detailed, time_day, temp, humidity, clouds, pressure, rain_prob]
+                daily_weather.append(list_now)
+
             currenttime, temp, humidity, clouds, pressure, sunrise, sunset = "F"*7
             current_weather = [currenttime, temp, humidity, clouds, pressure, sunrise, sunset]
 
-            return [current_weather, hourly_weather]
+            return [current_weather, hourly_weather, daily_weather]
 
     def get_weather_daily(self, latitude = '50.96', longitude = '7.00', info = False):
+        print('getting weekly weather')
         try:
             url = f"https://api.openweathermap.org/data/2.5/onecall?lat={latitude}&lon={longitude}&units=metric&exclude=minutely,hourly,alerts&appid={self.apikey}"
             r = requests.get(url)

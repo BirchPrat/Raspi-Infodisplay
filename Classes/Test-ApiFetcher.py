@@ -33,4 +33,4 @@ weather_api = ApiFetcher.WeatherApi(cred.weather_key)
 #weather = weather_api.get_weather_hourly(info = False)
 #weather = weather_api.get_weather_daily(info = False)
 
-weather = weather_api.get_weather(info=True)
+weather = weather_api.get_weather_onecall(info=True)

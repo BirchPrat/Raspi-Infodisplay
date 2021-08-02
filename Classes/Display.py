@@ -16,7 +16,27 @@ class Display:
         #fonts
         if font_location != '':
             self.font_1 = ImageFont.truetype(font_location, 22)
+            self.font_2 = ImageFont.truetype(font_location, 30)
             self.font_clock = ImageFont.truetype(font_location, 15)
+
+        #setting up clock parameters
+        deg_to_radians = 0.0174533
+
+        #creating coordinates for the clock
+        radius = 95 # determines how big clock is
+        self.clock_x_y = []
+        hours = 0
+        for i in range(-60, 300, 30):
+            hours += 1
+            self.clock_x_y.append([math.cos(i*deg_to_radians)*radius+99, math.sin(i*deg_to_radians)*radius+110, hours])
+        
+        #creating coordinates for minutes
+        radius_minutes = 67 #determiens how big minutes circle is
+        self.minutes_x_y = []
+        minutenzeiger = -1
+        for i in range(-90, 330, 6):
+            minutenzeiger += 1
+            self.minutes_x_y.append([math.cos(i*deg_to_radians)*radius_minutes+118, math.sin(i*deg_to_radians)*radius_minutes+93, minutenzeiger])
 
     def displaysettup(self):
         """Setting up the st7789 Display"""
@@ -233,9 +253,8 @@ class Display:
         
         self.displaywrite(infolist)    
 
-    def display_piholedat_tail(self, pihole_api):
+    def display_piholedat_tail(self, queri):
         """Displaying pihole tail"""
-        queri = pihole_api.get_allqueries()
         infolist = [
             [f"{queri[1][0]}", "#00b050", font_1],
             [f"{queri[1][2]}", "#FFFF00", font_1],
@@ -267,29 +286,29 @@ class Display:
 
     def display_weatherclock(self, weather, inside_temp = ''):
         """Display a weather clock"""
-        #clock position settup
-        deg_to_radians = 0.0174533
-        radius = 95 # determines how big clock is
-        clock_x_y = []
-        hours = 0
-        #creating coordinates for the clock
-        for i in range(-60, 300, 30):
-            hours += 1
-            clock_x_y.append([math.cos(i*deg_to_radians)*radius+99, math.sin(i*deg_to_radians)*radius+110, hours])
-
-        #getting the middle of the circle
-        middle_x = (clock_x_y[2][0] + clock_x_y[8][0]) / 2
-        middle_y = (clock_x_y[2][1] + clock_x_y[8][1]) / 2
 
         #drawing the clock and hourly weather
         image = Image.new('RGB', (self.disp.height, self.disp.width))
         draw = ImageDraw.Draw(image)
 
-        for position in clock_x_y:
+        for position in self.clock_x_y:
             for weath in weather[1]:
                 if int(weath[1]) == int(position[2]):
                     colour = self.warning_color_rgb(weath[-1])
                     draw.text((position[0], position[1]), f'{weath[2]}', font=self.font_clock, fill=colour)
+                if int(time.strftime('%I')) == int(position[2]):
+                    draw.text((position[0], position[1]+12), '---------', font=self.font_clock, fill='#ffffff')
+        
+        #drawing minutes
+        for position in self.minutes_x_y:
+                if int(time.strftime('%M')) == position[-1]:
+                    draw.text((position[0], position[1]), '.', font=self.font_2, fill='#ffffff')
+                if int(time.strftime('%S')) == position[-1]:
+                    draw.text((position[0], position[1]), '.', font=self.font_2, fill='#999999')
+                 
+        #getting the middle of the circle
+        middle_x = (self.clock_x_y[2][0] + self.clock_x_y[8][0]) / 2
+        middle_y = (self.clock_x_y[2][1] + self.clock_x_y[8][1]) / 2
 
         #drawing current weather in the middle of the clock
         if inside_temp == '':
@@ -300,11 +319,11 @@ class Display:
             draw.text((middle_x-15, middle_y-15), f'{weather[0][2]}%', font=self.font_clock, fill='#347B98')
 
         else:
-            draw.text((middle_x-23, middle_y-16), f'{weather[0][0]}', font=self.font_clock, fill='#00b050')
+            draw.text((middle_x-24, middle_y-16), f'{weather[0][0]}', font=self.font_clock, fill='#00b050')
             middle_y += self.font_clock.getsize(str(weather[0][0]))[1]
-            draw.text((middle_x-23, middle_y-16), f'{weather[0][1]}|{inside_temp[0]}°', font=self.font_clock, fill='#FC600A')
+            draw.text((middle_x-24, middle_y-16), f'{weather[0][1]}|{inside_temp[0]}°', font=self.font_clock, fill='#FC600A')
             middle_y += self.font_clock.getsize(str(weather[0][0]))[1]
-            draw.text((middle_x-23, middle_y-16), f'{weather[0][2]}|{inside_temp[1]}%', font=self.font_clock, fill='#347B98')          
+            draw.text((middle_x-24, middle_y-16), f'{weather[0][2]}|{inside_temp[1]}%', font=self.font_clock, fill='#347B98')          
 
         self.disp.image(image, self.rotate)
         
@@ -313,10 +332,10 @@ class Display:
      
         infolist = []
         colours = []
-        for i, daylist in enumerate(weather):
-            colour = self.warning_color_rgb(weather[i][-1])
+        for i, daylist in enumerate(weather[2]):
+            colour = self.warning_color_rgb(weather[2][i][-1])
             colours.append(colour)
-            infolist.append([f"{weather[i][1]}: {weather[i][2]['min']}-{weather[i][2]['max']}°C", colours[i], self.font_1])
+            infolist.append([f"{weather[2][i][1]}: {weather[2][i][2]['min']}-{weather[2][i][2]['max']}°C", colours[i], self.font_1])
 
         self.displaywrite(infolist, padding=8)   
 
