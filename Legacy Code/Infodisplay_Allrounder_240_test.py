@@ -12,13 +12,13 @@ import gpio_settup, use_func, vistemp
 #api credentials
 import cred
 #buttoncontrol and power
-from digitalio import DigitalInOut, Direction
+from digitalio DigitalInOut, Direction
 from gpiozero import Button
 from gpiozero import OutputDevice
 
 #DHT22 sensor library
-#import adafruit_dht
-import adafruit_bme280 
+import adafruit_dht
+#import adafruit_bme280 
 import board
 
 #other

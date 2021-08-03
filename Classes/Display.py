@@ -256,15 +256,15 @@ class Display:
     def display_piholedat_tail(self, queri):
         """Displaying pihole tail"""
         infolist = [
-            [f"{queri[1][0]}", "#00b050", font_1],
-            [f"{queri[1][2]}", "#FFFF00", font_1],
-            [f"{queri[1][3]}", "#6897bb", font_1],
-            [f"{queri[1][-2]} {queri[1][4]}", f"{queri[1][-1]}", font_1],
-            [f" ", "#00b050", font_1],                            
-            [f"{queri[0][0]}", "#00b050", font_1],
-            [f"{queri[0][2]}", "#FFFF00", font_1],
-            [f"{queri[0][3]}", "#6897bb", font_1],
-            [f"{queri[0][-2]} {queri[0][4]}", f"{queri[0][-1]}", font_1],
+            [f"{queri[1][0]}", "#00b050", self.font_1],
+            [f"{queri[1][2]}", "#FFFF00", self.font_1],
+            [f"{queri[1][3]}", "#6897bb", self.font_1],
+            [f"{queri[1][-2]} {queri[1][4]}", f"{queri[1][-1]}", self.font_1],
+            [f" ", "#00b050", self.font_1],                            
+            [f"{queri[0][0]}", "#00b050", self.font_1],
+            [f"{queri[0][2]}", "#FFFF00", self.font_1],
+            [f"{queri[0][3]}", "#6897bb", self.font_1],
+            [f"{queri[0][-2]} {queri[0][4]}", f"{queri[0][-1]}", self.font_1],
             ]
         
         self.displaywrite(infolist)    
@@ -295,7 +295,7 @@ class Display:
             for weath in weather[1]:
                 if int(weath[1]) == int(position[2]):
                     colour = self.warning_color_rgb(weath[-1])
-                    draw.text((position[0], position[1]), f'{weath[2]}', font=self.font_clock, fill=colour)
+                    draw.text((position[0], position[1]), f'{str(float(weath[2]))}', font=self.font_clock, fill=colour)
                 if int(time.strftime('%I')) == int(position[2]):
                     draw.text((position[0], position[1]+12), '---------', font=self.font_clock, fill='#ffffff')
         

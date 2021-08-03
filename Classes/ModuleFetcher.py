@@ -30,7 +30,6 @@ class ModuleFetcher:
                 temp = 'NaN'
                 humid = 'NaN'
                 pressure = 'NaN'
-            print(attempt)
         return [temp, humid, pressure] 
         
 
