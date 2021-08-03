@@ -51,18 +51,16 @@ fun = FunStuff.FunStuff()
 pistat = SysStat.SysStat()
 
 ##Setting up some Variables 
-#sleeping time between 0 and hoursasleep
-hoursasleep = 6
-sleepy = hoursasleep*60*60
-temp = [1, 2]
+#sleeping time for 6 hours
+sleepy = 6*60*60
 script_start = time.time()
-#concurrently running refresh functions for threads
+
+#concurrently running refresh functions in threads
 def weather_refresh(sleeptime = 6*60*60, refreshtime = 60*10):
+    '''threading function for weather refresh'''
     global weather
 
     while True:
-        print('weather thread')
-
         if time.strftime('%H') == '00':
                 time.sleep(sleeptime)
         else:
@@ -70,11 +68,10 @@ def weather_refresh(sleeptime = 6*60*60, refreshtime = 60*10):
             time.sleep(refreshtime)
 
 def temp_refresh(sleeptime = 6*60*60, refreshtime = 30):
+    '''threading function for temp refresh'''
     global temp
 
     while True:
-        print('temp thread')
-
         if time.strftime('%H') == '00':
                 time.sleep(sleeptime)
         else:
@@ -115,6 +112,7 @@ if __name__ == "__main__":
         """Button A (Displayswitch up 1. time) - weather daily clock"""
         if button_a.is_pressed:
             disp.displayclear()
+            time.sleep(0.5)
 
             while True:
                 if button_b.is_pressed:
