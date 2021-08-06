@@ -313,58 +313,74 @@ class Display:
 
     def display_weatherclock(self, weather, inside_temp = ''):
         """Display a weather clock"""
+        try:
+            #drawing the clock and hourly weather
+            image = Image.new('RGB', (self.disp.height, self.disp.width))
+            draw = ImageDraw.Draw(image)
 
-        #drawing the clock and hourly weather
-        image = Image.new('RGB', (self.disp.height, self.disp.width))
-        draw = ImageDraw.Draw(image)
+            for position in self.clock_x_y:
+                for weath in weather[1]:
+                    if int(weath[1]) == int(position[2]):
+                        colour = self.warning_color_rgb(weath[-1])
+                        draw.text((position[0], position[1]), f'{str(float(weath[2]))}', font=self.font_clock, fill=colour)
+                    if int(time.strftime('%I')) == int(position[2]):
+                        draw.text((position[0], position[1]+12), '---------', font=self.font_clock, fill='#ffffff')
+            
+            #drawing minutes
+            for position in self.minutes_x_y:
+                    if int(time.strftime('%M')) == position[-1]:
+                        draw.text((position[0], position[1]), '.', font=self.font_2, fill='#ffffff')
+                    if int(time.strftime('%S')) == position[-1]:
+                        draw.text((position[0], position[1]), '.', font=self.font_2, fill='#999999')
+                    
+            #getting the middle of the circle
+            middle_x = (self.clock_x_y[2][0] + self.clock_x_y[8][0]) / 2
+            middle_y = (self.clock_x_y[2][1] + self.clock_x_y[8][1]) / 2
 
-        for position in self.clock_x_y:
-            for weath in weather[1]:
-                if int(weath[1]) == int(position[2]):
-                    colour = self.warning_color_rgb(weath[-1])
-                    draw.text((position[0], position[1]), f'{str(float(weath[2]))}', font=self.font_clock, fill=colour)
-                if int(time.strftime('%I')) == int(position[2]):
-                    draw.text((position[0], position[1]+12), '---------', font=self.font_clock, fill='#ffffff')
+            #drawing current weather in the middle of the clock
+            if inside_temp == '':
+                draw.text((middle_x-15, middle_y-15), f'{weather[0][0]}', font=self.font_clock, fill='#00b050')
+                middle_y += self.font_clock.getsize(str(weather[0][0]))[1]
+                draw.text((middle_x-15, middle_y-15), f'{weather[0][1]}°C', font=self.font_clock, fill='#FC600A')
+                middle_y += self.font_clock.getsize(str(weather[0][0]))[1]
+                draw.text((middle_x-15, middle_y-15), f'{weather[0][2]}%', font=self.font_clock, fill='#347B98')
+
+            else:
+                draw.text((middle_x-24, middle_y-16), f'{weather[0][0]}', font=self.font_clock, fill='#00b050')
+                middle_y += self.font_clock.getsize(str(weather[0][0]))[1]
+                draw.text((middle_x-24, middle_y-16), f'{weather[0][1]}|{inside_temp[0]}°', font=self.font_clock, fill='#FC600A')
+                middle_y += self.font_clock.getsize(str(weather[0][0]))[1]
+                draw.text((middle_x-24, middle_y-16), f'{weather[0][2]}|{inside_temp[1]}%', font=self.font_clock, fill='#347B98')          
+
+            self.disp.image(image, self.rotate)
         
-        #drawing minutes
-        for position in self.minutes_x_y:
-                if int(time.strftime('%M')) == position[-1]:
-                    draw.text((position[0], position[1]), '.', font=self.font_2, fill='#ffffff')
-                if int(time.strftime('%S')) == position[-1]:
-                    draw.text((position[0], position[1]), '.', font=self.font_2, fill='#999999')
-                 
-        #getting the middle of the circle
-        middle_x = (self.clock_x_y[2][0] + self.clock_x_y[8][0]) / 2
-        middle_y = (self.clock_x_y[2][1] + self.clock_x_y[8][1]) / 2
+        except:        
+            infolist = [
+                [f"Failed", "#00b050", self.font_1],
+                [f"Probably no internet", "#00b050", self.font_1],  
+            ]
 
-        #drawing current weather in the middle of the clock
-        if inside_temp == '':
-            draw.text((middle_x-15, middle_y-15), f'{weather[0][0]}', font=self.font_clock, fill='#00b050')
-            middle_y += self.font_clock.getsize(str(weather[0][0]))[1]
-            draw.text((middle_x-15, middle_y-15), f'{weather[0][1]}°C', font=self.font_clock, fill='#FC600A')
-            middle_y += self.font_clock.getsize(str(weather[0][0]))[1]
-            draw.text((middle_x-15, middle_y-15), f'{weather[0][2]}%', font=self.font_clock, fill='#347B98')
-
-        else:
-            draw.text((middle_x-24, middle_y-16), f'{weather[0][0]}', font=self.font_clock, fill='#00b050')
-            middle_y += self.font_clock.getsize(str(weather[0][0]))[1]
-            draw.text((middle_x-24, middle_y-16), f'{weather[0][1]}|{inside_temp[0]}°', font=self.font_clock, fill='#FC600A')
-            middle_y += self.font_clock.getsize(str(weather[0][0]))[1]
-            draw.text((middle_x-24, middle_y-16), f'{weather[0][2]}|{inside_temp[1]}%', font=self.font_clock, fill='#347B98')          
-
-        self.disp.image(image, self.rotate)
+            self.displaywrite(infolist, padding=8)
         
     def display_weather_week(self, weather):
-        """Displaying weather for next week"""
-     
-        infolist = []
-        colours = []
-        for i, daylist in enumerate(weather[2]):
-            colour = self.warning_color_rgb(weather[2][i][-1])
-            colours.append(colour)
-            infolist.append([f"{weather[2][i][1]}: {weather[2][i][2]['min']}-{weather[2][i][2]['max']}°C", colours[i], self.font_1])
+        """Displaying weather data for next week"""
+        try:
+            infolist = []
+            colours = []
+            for i, daylist in enumerate(weather[2]):
+                colour = self.warning_color_rgb(weather[2][i][-1])
+                colours.append(colour)
+                infolist.append([f"{weather[2][i][1]}: {weather[2][i][2]['min']}-{weather[2][i][2]['max']}°C", colours[i], self.font_1])
 
-        self.displaywrite(infolist, padding=8)
+            self.displaywrite(infolist, padding=8)
+        
+        except:        
+            infolist = [
+                [f"Failed", "#00b050", self.font_1],
+                [f"Probably no internet", "#00b050", self.font_1],  
+            ]
+
+            self.displaywrite(infolist, padding=8)
 
     def display_timer(self, timer):
         """Displaying timer"""
