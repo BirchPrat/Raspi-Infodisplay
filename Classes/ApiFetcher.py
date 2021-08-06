@@ -162,7 +162,7 @@ class WeatherApi:
             else:
                 #hourly weather
                 hourly_weather = []
-                for num in range(1,13):
+                for num in range(0,12):
                     time_detailed = time.strftime("%b %d %H:%M", time.localtime(int(weather['hourly'][num]['dt'])))
                     time_hour = time.strftime("%I", time.localtime(int(weather['hourly'][num]['dt'])))
                     temp = weather['hourly'][num]['temp']
