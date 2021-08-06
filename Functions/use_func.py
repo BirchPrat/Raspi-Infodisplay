@@ -9,7 +9,14 @@ def time_converter(sec_input):
         mins = mins % 60
         days = round(hours / 24, 3)
       
-        return [f"{int(hours)}:{int(mins)}:{int(sec)}", days]
+        return [f"{int(hours)}:{int(mins)}:{int(sec)}", days, f'{int(mins)}:{int(sec)}']
     
     except:
         return none
+
+
+def break_timer(worktime, breaktime):
+    '''timer for worktime and breaktime'''
+    work_start = time.time()
+
+    

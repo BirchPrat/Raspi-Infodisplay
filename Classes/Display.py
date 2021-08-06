@@ -18,6 +18,8 @@ class Display:
             self.font_1 = ImageFont.truetype(font_location, 22)
             self.font_2 = ImageFont.truetype(font_location, 30)
             self.font_clock = ImageFont.truetype(font_location, 15)
+            self.font_timer = ImageFont.truetype(font_location, 80)
+            self.font_pistat = ImageFont.truetype(font_location, 17)
 
         #setting up clock parameters
         deg_to_radians = 0.0174533
@@ -79,7 +81,8 @@ class Display:
                 width=135,
                 height=240, 
                 x_offset=53, 
-                y_offset=40)
+                y_offset=40,
+                )
 
         # Turn on the backlight
         backlight.switch_to_output()
@@ -125,10 +128,10 @@ class Display:
 
     def displayclear(self):
         #Drawing the balck rectangle and displaying it
-        image = Image.new('RGB', (self.disp.width, self.disp.height))
+        image = Image.new('RGB', (self.disp.height, self.disp.width))
         draw = ImageDraw.Draw(image)
-
-        draw.rectangle((0, 0, self.disp.width, self.disp.height), outline=0, fill=(0, 0, 0))
+        draw.rectangle((0, 0, self.disp.height, self.disp.width), outline=0, fill=(0, 0, 0))
+        
         self.disp.image(image, self.rotate)
 
     def backlight(self, status):
@@ -148,27 +151,35 @@ class Display:
         
         # Scale the image to the smaller screen dimension
         image_ratio = image.width / image.height
-        screen_ratio = self.disp.width / self.disp.height
+
+        if self.size != '240x135':
+            width = self.disp.width
+            height = self.disp.height
+        elif self.size == '240x135':
+            width = self.disp.height
+            height = self.disp.width
+            
+        screen_ratio = width / height
         if screen_ratio < image_ratio:
-            scaled_width = image.width * self.disp.height // image.height
-            scaled_height = self.disp.height
+            scaled_width = image.width * height // image.height
+            scaled_height = height
         else:
-            scaled_width = self.disp.width
-            scaled_height = image.height * self.disp.width // image.width
+            scaled_width = width
+            scaled_height = image.height * width // image.width
         image = image.resize((scaled_width, scaled_height), Image.BICUBIC)
-        
+    
         # Crop and center the image
-        x = scaled_width // 2 - self.disp.width // 2
-        y = scaled_height // 2 - self.disp.height // 2
-        image = image.crop((x, y, x + self.disp.width, y + self.disp.height))
-        
+        x = scaled_width // 2 - width // 2
+        y = scaled_height // 2 - height // 2
+        image = image.crop((x, y, x + width, y + height))
+    
         # self.display image.
         self.disp.image(image, self.rotate)
 
     def display_main_simple(self, sensor_data, pistat_class, uptime):
+        """Displaying temperature, pistats uptime and weather"""
         pistat = pistat_class.get_systemstats(light = 'no')
 
-        """Displaying temperature, pistats uptime and weather"""
         infolist = [
             [f"{time.strftime('%b %d %H:%M:%S')}", '#00b050', self.font_1],
             [f"Innen Temp: {sensor_data[0]}°C", '#FC600A', self.font_1],
@@ -183,7 +194,23 @@ class Display:
             ]
         
         self.displaywrite(infolist)
-    
+
+    def display_pi_stats(self, pistat_class, uptime):
+        """Displaying temperature, pistats uptime and weather"""
+        pistat = pistat_class.get_systemstats(light = 'no')
+
+        infolist = [
+            [f"{time.strftime('%b %d %H:%M:%S')}", '#00b050', self.font_pistat],
+            [f"{pistat[0]}", "#576675", self.font_pistat],
+            [f"Uptime: {uptime[1]} days", '#D61A46', self.font_pistat],            
+            [f"{pistat[1]}", "#ffc0cb", self.font_pistat],
+            [f"{pistat[2]}", "#FC600A", self.font_pistat],
+            [f"{pistat[3]}", "#808080", self.font_pistat],
+            [f"{pistat[4]}", "#daa520", self.font_pistat],                      
+            ]
+        
+        self.displaywrite(infolist)    
+
     def display_main_weather(self, sensor_data, pistat_class, uptime, weather):
         pistat = pistat_class.get_systemstats(light = 'no')
 
@@ -337,7 +364,17 @@ class Display:
             colours.append(colour)
             infolist.append([f"{weather[2][i][1]}: {weather[2][i][2]['min']}-{weather[2][i][2]['max']}°C", colours[i], self.font_1])
 
-        self.displaywrite(infolist, padding=8)   
+        self.displaywrite(infolist, padding=8)
+
+    def display_timer(self, timer):
+        """Displaying timer"""
+        infolist = [
+            [f"", "#00b050", self.font_1],
+            [f"{timer}", "#00b050", self.font_timer],
+            ]
+        
+        self.displaywrite_alt(infolist, padding = 20) 
+   
 
 
 
