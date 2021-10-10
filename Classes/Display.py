@@ -392,5 +392,26 @@ class Display:
         self.displaywrite_alt(infolist, padding = 20) 
    
 
+class CamInterface(Display):
+    """Camera-Interface for 240x240 gamepad Screen"""
+    def __init__(self, size, type, rotate = 0, font_location = ''):
+        super().__init__(size, type, rotate, font_location) 
+
+    def first_layer(self, x_axis_list):
+        """
+        Displaying first layer interface with four options 
+        x_axis are buttons showing where the selection currently is
+        selection is displayed via colour
+        """
+        
+        infolist = [
+            [f"Preview", f'#00b050' if x_axis_list[0] else f'#2ae32a', self.font_1],
+            [f"Timelaps Photo", f'#00b050' if x_axis_list[1] else f'#2ae32a', self.font_1],
+            [f"Stil Photo", f'#00b050' if x_axis_list[2] else f'#2ae32a', self.font_1],
+            [f"Video", f'#00b050' if x_axis_list[3] else f'#2ae32a', self.font_1],
+            ]
+        
+        self.displaywrite(infolist)   
+
 
 
