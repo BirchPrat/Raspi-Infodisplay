@@ -413,5 +413,19 @@ class CamInterface(Display):
         
         self.displaywrite(infolist)   
 
+    def timelaps_layer(self, x_axis_list, duration, time_between_phot, resolution):
+        """
+        Displaying timelaps option layer interface with four options 
+        x_axis are buttons showing where the selection currently is
+        selection is displayed via colour
+        """
+        
+        infolist = [
+            [f"Duration: {duration} min", f'#00b050' if x_axis_list[0] else f'#2ae32a', self.font_1],
+            [f"TbP: {time_between_phot} sec", f'#00b050' if x_axis_list[1] else f'#2ae32a', self.font_1],
+            [f"Resolution: {resolution[0]}x{resolution[1]}", f'#00b050' if x_axis_list[2] else f'#2ae32a', self.font_1],
+            ]
+        
+        self.displaywrite(infolist)  
 
 
